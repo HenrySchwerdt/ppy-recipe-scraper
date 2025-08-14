@@ -21,3 +21,13 @@ export class SchemaOrgException extends Error {
     this.name = 'SchemaOrgException';
   }
 }
+
+export class FieldNotProvidedByWebsiteException extends Error {
+  public returnValue: any;
+
+  constructor(returnValue: any, message?: string) {
+    super(message || `Field not provided by website: ${returnValue}`);
+    this.name = 'FieldNotProvidedByWebsiteException';
+    this.returnValue = returnValue;
+  }
+}

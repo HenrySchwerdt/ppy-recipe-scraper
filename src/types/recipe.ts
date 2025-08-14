@@ -1,8 +1,11 @@
+import { ParsedIngredient } from '../utils/ingredient-parser';
+
 export interface Recipe {
   title: string;
   totalTime?: number; // in minutes
   yields?: string;
   ingredients: string[];
+  parsedIngredients?: ParsedIngredient[];
   instructions: string[];
   image?: string;
   author?: string;

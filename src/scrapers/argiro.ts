@@ -20,6 +20,10 @@ export class Argiro extends AbstractScraper {
   }
 
   title(): string {
+    // Try schema.org first, then fallback to custom selector
+    const schemaTitle = this.schema.title();
+    if (schemaTitle) return schemaTitle;
+    
     if (!this.$) return '';
     const titleElement = this.$('h1.single_recipe__title');
     return titleElement.length > 0 ? titleElement.text().trim() : '';
@@ -129,6 +133,11 @@ export class Argiro extends AbstractScraper {
         });
       });
     });
+    
+    // Fallback to schema.org if no custom ingredients found
+    if (results.length === 0) {
+      return this.schema.ingredients();
+    }
     
     return results;
   }

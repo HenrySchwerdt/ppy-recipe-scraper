@@ -19,6 +19,10 @@ export class AmazingOriental extends AbstractScraper {
   }
 
   title(): string {
+    // Try schema.org first, then fallback to h1
+    const schemaTitle = this.schema.title();
+    if (schemaTitle) return schemaTitle;
+    
     if (!this.$) return '';
     return this.$('h1').first().text().trim();
   }
@@ -32,6 +36,11 @@ export class AmazingOriental extends AbstractScraper {
       const text = this.$(element).text().replace(/\s+/g, ' ').trim();
       if (text) ingredients.push(text);
     });
+    
+    // Fallback to schema.org if no custom ingredients found
+    if (ingredients.length === 0) {
+      return this.schema.ingredients();
+    }
     
     return ingredients;
   }

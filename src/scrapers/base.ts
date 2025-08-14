@@ -2,7 +2,8 @@ import * as cheerio from 'cheerio';
 import { Recipe, ScraperOptions, ScraperResult } from '../types/recipe.js';
 import { SchemaOrg } from '../utils/schema-org';
 import { OpenGraph } from '../utils/opengraph';
-import { StaticValueException } from '../utils/exceptions';
+import { IngredientParser } from '../utils/ingredient-parser';
+import { StaticValueException, FieldNotProvidedByWebsiteException } from '../utils/exceptions';
 
 export abstract class AbstractScraper {
   protected url: string;
@@ -147,9 +148,12 @@ export abstract class AbstractScraper {
 
   async scrape(): Promise<ScraperResult> {
     try {
+      const ingredients = this.safeCall(() => this.ingredients()) || [];
+      
       const recipe: Recipe = {
         title: this.safeCall(() => this.title()) || '',
-        ingredients: this.safeCall(() => this.ingredients()) || [],
+        ingredients,
+        parsedIngredients: ingredients.length > 0 ? IngredientParser.parseIngredients(ingredients) : [],
         instructions: this.safeCall(() => this.instructionsList()) || [],
         totalTime: this.safeCall(() => this.totalTime()),
         yields: this.safeCall(() => this.yields()),
@@ -179,7 +183,7 @@ export abstract class AbstractScraper {
     try {
       return fn();
     } catch (error) {
-      if (error instanceof StaticValueException) {
+      if (error instanceof StaticValueException || error instanceof FieldNotProvidedByWebsiteException) {
         return error.returnValue;
       }
       return undefined;

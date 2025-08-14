@@ -19,7 +19,15 @@ export class SchemaOrg {
     
     while ((match = jsonLdRegex.exec(html)) !== null) {
       try {
-        const jsonData = JSON.parse(match[1]);
+        // Clean control characters and escape sequences that might break JSON parsing
+        const cleanedJson = match[1]
+          .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+          .replace(/\r\n/g, '\\n')         // Escape newlines
+          .replace(/\r/g, '\\n')           // Escape carriage returns
+          .replace(/\n/g, '\\n')           // Escape line feeds
+          .replace(/\t/g, '\\t');          // Escape tabs
+        
+        const jsonData = JSON.parse(cleanedJson);
         if (this.isRecipeData(jsonData)) {
           this.data = jsonData;
           break;
@@ -43,6 +51,7 @@ export class SchemaOrg {
         }
       } catch (error) {
         // Ignore invalid JSON
+        continue;
       }
     }
   }

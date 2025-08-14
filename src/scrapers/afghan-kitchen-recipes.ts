@@ -17,10 +17,12 @@ export class AfghanKitchenRecipes extends AbstractScraper {
     const givenName = this.$('h5.given-name');
     if (givenName.length > 0) {
       const authorLink = givenName.find('a[rel="author"]');
-      return authorLink.length > 0 ? authorLink.text().trim() : undefined;
+      const customAuthor = authorLink.length > 0 ? authorLink.text().trim() : undefined;
+      if (customAuthor) return customAuthor;
     }
     
-    return undefined;
+    // Fallback to schema.org
+    return this.schema.author();
   }
 
   siteName(): string {
@@ -28,7 +30,12 @@ export class AfghanKitchenRecipes extends AbstractScraper {
   }
 
   title(): string {
-    return this.schema.title() || '';
+    // Try schema.org first, then fallback to page title
+    const schemaTitle = this.schema.title();
+    if (schemaTitle) return schemaTitle;
+    
+    if (!this.$) return '';
+    return this.$('title').text().trim() || '';
   }
 
   ingredients(): string[] {
@@ -40,6 +47,11 @@ export class AfghanKitchenRecipes extends AbstractScraper {
       const text = this.$(element).text().trim();
       if (text) ingredients.push(text);
     });
+    
+    // Fallback to schema.org if no custom ingredients found
+    if (ingredients.length === 0) {
+      return this.schema.ingredients();
+    }
     
     return ingredients;
   }
@@ -54,7 +66,12 @@ export class AfghanKitchenRecipes extends AbstractScraper {
       if (text) instructions.push(text);
     });
     
-    return instructions.join('\n');
+    if (instructions.length > 0) {
+      return instructions.join('\n');
+    }
+    
+    // Fallback to schema.org
+    return this.schema.instructions();
   }
 
   category(): string | undefined {
@@ -66,10 +83,12 @@ export class AfghanKitchenRecipes extends AbstractScraper {
     
     const servings = this.$('li.servings').first();
     if (servings.length > 0) {
-      return getYields(servings.text().trim());
+      const customYields = getYields(servings.text().trim());
+      if (customYields) return customYields;
     }
     
-    return undefined;
+    // Fallback to schema.org
+    return this.schema.yields();
   }
 
   description(): string | undefined {
@@ -80,15 +99,18 @@ export class AfghanKitchenRecipes extends AbstractScraper {
     if (!this.$) return undefined;
     
     const readyIn = this.$('li.ready-in').first();
-    if (readyIn.length === 0) return undefined;
+    if (readyIn.length > 0) {
+      const readyText = readyIn.find('span.value').text().trim();
+      if (readyText && readyText.endsWith('h')) {
+        const timePart = readyText.slice(0, -1); // Remove 'h'
+        const [hours, minutes] = timePart.split(':');
+        const customTime = parseInt(hours) * 60 + parseInt(minutes);
+        if (!isNaN(customTime)) return customTime;
+      }
+    }
     
-    const readyText = readyIn.find('span.value').text().trim();
-    if (!readyText || !readyText.endsWith('h')) return undefined;
-    
-    const timePart = readyText.slice(0, -1); // Remove 'h'
-    const [hours, minutes] = timePart.split(':');
-    
-    return parseInt(hours) * 60 + parseInt(minutes);
+    // Fallback to schema.org
+    return this.schema.totalTime();
   }
 
   cookTime(): number | undefined {

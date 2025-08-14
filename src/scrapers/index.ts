@@ -17,6 +17,15 @@ import { BonAppetit } from './bon-appetit';
 import { BudgetBytes } from './budget-bytes';
 import { BettyCrocker } from './betty-crocker';
 import { BestRecipes } from './best-recipes';
+import { ChefJackOvens } from './chef-jack-ovens';
+import { Chefkoch } from './chefkoch';
+import { Chefnini } from './chefnini';
+import { CookieAndKate } from './cookie-and-kate';
+import { CookingLight } from './cooking-light';
+import { CookPad } from './cookpad';
+import { ClosetCooking } from './closet-cooking';
+import { ChefSavvy } from './chef-savvy';
+import { LidlKochen } from './lidl-kochen';
 
 export { 
   AbstractScraper, 
@@ -37,7 +46,16 @@ export {
   BonAppetit,
   BudgetBytes,
   BettyCrocker,
-  BestRecipes
+  BestRecipes,
+  ChefJackOvens,
+  Chefkoch,
+  Chefnini,
+  CookieAndKate,
+  CookingLight,
+  CookPad,
+  ClosetCooking,
+  ChefSavvy,
+  LidlKochen
 };
 
 export const SCRAPERS = [
@@ -58,7 +76,16 @@ export const SCRAPERS = [
   BonAppetit,
   BudgetBytes,
   BettyCrocker,
-  BestRecipes
+  BestRecipes,
+  ChefJackOvens,
+  Chefkoch,
+  Chefnini,
+  CookieAndKate,
+  CookingLight,
+  CookPad,
+  ClosetCooking,
+  ChefSavvy,
+  LidlKochen
 ] as const;
 
 export type ScraperClass = typeof SCRAPERS[number];
